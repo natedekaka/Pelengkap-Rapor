@@ -125,6 +125,14 @@ if ($siswa) {
     </nav>
 
     <div class="container py-4">
+        <?php if ($user['role'] === 'siswa'): ?>
+        <div class="alert alert-info d-flex align-items-center gap-2 py-2 px-3 mb-3 small" role="alert" style="border-radius: 12px;">
+            <i class="fas fa-info-circle"></i>
+            <span>Isi data yang masih kosong, perbaiki jika ada yang salah, lalu klik <strong>Simpan & Verifikasi</strong> jika sudah yakin benar.</span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" style="font-size: 0.7rem;"></button>
+        </div>
+        <?php endif; ?>
+
         <?php if ($error): ?>
             <div class="alert alert-danger d-flex align-items-center gap-2"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
