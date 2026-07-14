@@ -55,6 +55,7 @@ if ($siswa) {
         'pekerjaan_ayah' => 'Pekerjaan Ayah',
         'pekerjaan_ibu' => 'Pekerjaan Ibu',
         'alamat_ortu' => 'Alamat Orang Tua',
+        'no_telp_ortu' => 'No. Telepon Orang Tua',
         'nama_wali' => 'Nama Wali',
         'alamat_wali' => 'Alamat Wali',
         'no_telp_wali' => 'No. Telp Wali',
