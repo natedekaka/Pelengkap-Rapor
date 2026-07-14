@@ -1,0 +1,34 @@
+services:
+  db:
+    image: docker.io/library/mariadb:10
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: pelengkap_rapor
+    volumes:
+      - db_data:/var/lib/mysql
+    # ports: (tidak perlu expose, akses via phpmyadmin)
+  phpmyadmin:
+    image: docker.io/library/phpmyadmin:latest
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: rootpass
+    ports:
+      - "9093:80"
+    depends_on:
+      - db
+  web:
+    image: docker.io/library/php:8.2-apache
+    ports:
+      - "9092:80"
+    volumes:
+      - ./app:/var/www/html
+      - /home/daniarsyah/projects/natedekaka/pelengkap_rapor/sql:/var/www/sql
+      - /home/daniarsyah/Documents/Pelengkap-Rapor:/data/pdf
+    command: bash -c "docker-php-ext-install mysqli && a2enmod rewrite && echo 'ServerName localhost' >> /etc/apache2/apache2.conf && apache2-foreground"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
