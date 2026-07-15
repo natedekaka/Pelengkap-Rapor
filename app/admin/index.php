@@ -77,7 +77,6 @@ function render_header($title) {
                     <a href="?page=export" class="<?= $page === 'export' ? 'active' : '' ?>"><i class="fas fa-download"></i> Export Data</a>
                     <a href="ganti_password.php"><i class="fas fa-key"></i> Ganti Password</a>
                     <hr style="border-color: rgba(255,255,255,0.1); margin: 0.5rem 1rem;">
-                    <a href="../verifikasi.php"><i class="fas fa-user-check"></i> Data Per-Siswa</a>
                     <a href="../logout.php"><i class="fas fa-sign-out-alt"></i> Keluar</a>
                 </div>
             </div>
@@ -100,13 +99,10 @@ function render_footer() {
 
 switch ($page) {
     case 'siswa':
-        render_header('Data Siswa');
-
         $search = $_GET['search'] ?? '';
         $filter = $_GET['filter'] ?? 'all';
-        $page_num = max(1, (int)($_GET['p'] ?? 1));
-        $limit = 50;
-        $offset = ($page_num - 1) * $limit;
+        $angkatan = $_GET['angkatan'] ?? '';
+        $export_format = $_GET['format'] ?? '';
 
         $where = "WHERE 1=1";
         $params = [];
@@ -119,8 +115,117 @@ switch ($page) {
             $types = 'sss';
         }
 
+        if ($angkatan !== '') {
+            $where .= " AND LEFT(nis, 4) = ?";
+            $params[] = $angkatan;
+            $types .= 's';
+        }
+
         if ($filter === 'verified') $where .= " AND verified = 1";
         elseif ($filter === 'unverified') $where .= " AND verified = 0";
+
+        $angkatan_list = conn()->query("SELECT DISTINCT LEFT(nis, 4) as angkatan FROM siswa ORDER BY angkatan DESC");
+
+        // --- EXPORT FORMATS (before render_header) ---
+        if ($export_format === 'csv') {
+            $q = conn()->prepare("SELECT * FROM siswa $where ORDER BY nama");
+            if ($params) $q->bind_param($types, ...$params);
+            $q->execute();
+            $result = $q->get_result();
+
+            $label = $angkatan ? "angkatan_$angkatan" : "semua";
+            $label .= $filter !== 'all' ? "_$filter" : "";
+
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename=data_siswa_' . $label . '.csv');
+            $f = fopen('php://output', 'w');
+            fprintf($f, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($f, ['NIS', 'NISN', 'Nama', 'Tempat Lahir', 'Tgl Lahir', 'JK', 'Agama', 'Status Keluarga', 'Anak ke',
+                'Alamat', 'No Telp', 'Sekolah Asal', 'Diterima Kelas', 'Diterima Tanggal',
+                'Nama Ayah', 'Nama Ibu', 'Pekerjaan Ayah', 'Pekerjaan Ibu', 'Alamat Ortu', 'No Telp Ortu',
+                'Nama Wali', 'Alamat Wali', 'No Telp Wali', 'Pekerjaan Wali', 'Verified']);
+
+            while ($r = $result->fetch_assoc()) {
+                fputcsv($f, [
+                    $r['nis'], $r['nisn'], $r['nama'], $r['tempat_lahir'], $r['tgl_lahir'],
+                    $r['jenis_kelamin'], $r['agama'], $r['status_keluarga'], $r['anak_ke'],
+                    $r['alamat'], $r['no_telp'], $r['sekolah_asal'], $r['diterima_kelas'], $r['diterima_tanggal'],
+                    $r['nama_ayah'], $r['nama_ibu'], $r['pekerjaan_ayah'], $r['pekerjaan_ibu'],
+                    $r['alamat_ortu'], $r['no_telp_ortu'],
+                    $r['nama_wali'], $r['alamat_wali'], $r['no_telp_wali'], $r['pekerjaan_wali'],
+                    $r['verified'] ? 'Ya' : 'Tidak'
+                ]);
+            }
+            fclose($f);
+            exit;
+        }
+
+        if ($export_format === 'pdf') {
+            $q = conn()->prepare("SELECT * FROM siswa $where ORDER BY nama");
+            if ($params) $q->bind_param($types, ...$params);
+            $q->execute();
+            $result = $q->get_result();
+            ?>
+            <!DOCTYPE html>
+            <html lang="id">
+            <head>
+                <meta charset="UTF-8">
+                <title>Data Siswa</title>
+                <style>
+                    @page { size: landscape; margin: 10mm; }
+                    body { font-family: 'Courier New', monospace; font-size: 9px; }
+                    h2 { text-align: center; margin-bottom: 15px; font-family: sans-serif; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { border: 1px solid #000; padding: 2px 4px; text-align: left; }
+                    th { background: #eee; font-weight: bold; text-align: center; }
+                    .info { text-align: center; margin-bottom: 10px; font-size: 10px; font-family: sans-serif; }
+                    .footer { text-align: center; margin-top: 15px; font-size: 8px; color: #666; font-family: sans-serif; }
+                </style>
+            </head>
+            <body>
+                <h2>Data Siswa</h2>
+                <div class="info">
+                    Filter: <?= $angkatan ? "Angkatan TP $angkatan" : "Semua Angkatan" ?>
+                    | <?= $filter === 'verified' ? 'Terverifikasi' : ($filter === 'unverified' ? 'Belum Verifikasi' : 'Semua Status') ?>
+                    | Total: <?= $result->num_rows ?> siswa
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>NIS</th>
+                            <th>NISN</th>
+                            <th>Nama</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php $no = 1; while ($r = $result->fetch_assoc()): ?>
+                        <tr>
+                            <td style="text-align:center"><?= $no++ ?></td>
+                            <td><?= htmlspecialchars($r['nis']) ?></td>
+                            <td><?= htmlspecialchars($r['nisn']) ?></td>
+                            <td><?= htmlspecialchars($r['nama']) ?></td>
+                            <td style="text-align:center"><?= $r['verified'] ? 'V' : 'P' ?></td>
+                        </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+                <div class="footer">Dicetak: <?= date('d/m/Y H:i') ?></div>
+                <script>window.onload = function() { window.print(); };</script>
+            </body>
+            </html>
+            <?php
+            exit;
+        }
+
+        // --- NORMAL DISPLAY ---
+        render_header('Data Siswa');
+
+        $page_num = max(1, (int)($_GET['p'] ?? 1));
+        $limit = 50;
+        $offset = ($page_num - 1) * $limit;
 
         $count_q = conn()->prepare("SELECT COUNT(*) as c FROM siswa $where");
         if ($params) $count_q->bind_param($types, ...$params);
@@ -139,30 +244,46 @@ switch ($page) {
 
         <div class="topbar">
             <div><h5 class="m-0 fw-bold"><i class="fas fa-users me-2"></i>Data Siswa</h5></div>
-            <div>
+            <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small">Total: <?= $total_rows ?> siswa</span>
+                <a href="?page=siswa&format=csv&search=<?= urlencode($search) ?>&filter=<?= $filter ?>&angkatan=<?= urlencode($angkatan) ?>" class="btn btn-sm btn-success"><i class="fas fa-file-csv"></i> CSV</a>
+                <a href="?page=siswa&format=pdf&search=<?= urlencode($search) ?>&filter=<?= $filter ?>&angkatan=<?= urlencode($angkatan) ?>" class="btn btn-sm btn-danger"><i class="fas fa-file-pdf"></i> PDF</a>
             </div>
         </div>
 
         <div class="card mb-4">
             <div class="card-body">
-                <form method="GET" class="row g-2 align-items-center">
+                <form method="GET" class="row g-2 align-items-end">
                     <input type="hidden" name="page" value="siswa">
                     <div class="col-md-5">
-                        <input type="text" name="search" class="form-control" placeholder="Cari nama / NIS / NISN..." value="<?= htmlspecialchars($search) ?>">
+                        <label class="form-label small mb-1">Cari</label>
+                        <input type="text" name="search" class="form-control" placeholder="Nama / NIS / NISN..." value="<?= htmlspecialchars($search) ?>">
                     </div>
-                    <div class="col-md-3">
-                        <select name="filter" class="form-select">
-                            <option value="all" <?= $filter === 'all' ? 'selected' : '' ?>>Semua</option>
-                            <option value="verified" <?= $filter === 'verified' ? 'selected' : '' ?>>Terverifikasi</option>
-                            <option value="unverified" <?= $filter === 'unverified' ? 'selected' : '' ?>>Belum Verifikasi</option>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Angkatan</label>
+                        <select name="angkatan" class="form-select">
+                            <option value="">Semua</option>
+                            <?php
+                            $angkatan_list = conn()->query("SELECT DISTINCT LEFT(nis, 4) as angkatan FROM siswa ORDER BY angkatan DESC");
+                            while ($a = $angkatan_list->fetch_assoc()):
+                            ?>
+                            <option value="<?= $a['angkatan'] ?>" <?= $angkatan === $a['angkatan'] ? 'selected' : '' ?>>TP <?= $a['angkatan'] ?></option>
+                            <?php endwhile; ?>
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <button class="btn btn-primary w-100"><i class="fas fa-search"></i> Cari</button>
+                        <label class="form-label small mb-1">Status</label>
+                        <select name="filter" class="form-select">
+                            <option value="all" <?= $filter === 'all' ? 'selected' : '' ?>>Semua</option>
+                            <option value="verified" <?= $filter === 'verified' ? 'selected' : '' ?>>Terverifikasi</option>
+                            <option value="unverified" <?= $filter === 'unverified' ? 'selected' : '' ?>>Belum</option>
+                        </select>
                     </div>
-                    <div class="col-md-2">
-                        <a href="?page=siswa" class="btn btn-outline-secondary w-100"><i class="fas fa-redo"></i> Reset</a>
+                    <div class="col-md-3">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary flex-fill"><i class="fas fa-search"></i> Cari</button>
+                            <a href="?page=siswa" class="btn btn-outline-secondary flex-fill"><i class="fas fa-redo"></i> Reset</a>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -216,7 +337,7 @@ switch ($page) {
                     <ul class="pagination pagination-sm mb-0 justify-content-center">
                         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                             <li class="page-item <?= $i === $page_num ? 'active' : '' ?>">
-                                <a class="page-link" href="?page=siswa&p=<?= $i ?>&search=<?= urlencode($search) ?>&filter=<?= $filter ?>"><?= $i ?></a>
+                                <a class="page-link" href="?page=siswa&p=<?= $i ?>&search=<?= urlencode($search) ?>&filter=<?= $filter ?>&angkatan=<?= urlencode($angkatan) ?>"><?= $i ?></a>
                             </li>
                         <?php endfor; ?>
                     </ul>
@@ -229,8 +350,6 @@ switch ($page) {
         break;
 
     case 'export':
-        render_header('Export Data');
-
         $format = $_GET['format'] ?? '';
         $filter_export = $_GET['filter_export'] ?? 'all';
 
@@ -239,7 +358,7 @@ switch ($page) {
             $q = conn()->query("SELECT * FROM siswa $where ORDER BY nama");
 
             header('Content-Type: text/csv; charset=utf-8');
-            header('Content-Disposition: attachment; filename=data_siswa_verified.csv');
+            header('Content-Disposition: attachment; filename=data_siswa_' . $filter_export . '.csv');
             $f = fopen('php://output', 'w');
             fprintf($f, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
@@ -288,6 +407,8 @@ switch ($page) {
             }
             exit;
         }
+
+        render_header('Export Data');
         ?>
         <?php if ($success): ?><div class="alert alert-success"><?= $success ?></div><?php endif; ?>
 
@@ -352,6 +473,7 @@ switch ($page) {
 
         $unverified_list = conn()->query("SELECT * FROM siswa WHERE verified = 0 ORDER BY nama LIMIT 10");
         $recent_verified = conn()->query("SELECT * FROM siswa WHERE verified = 1 AND verified_at IS NOT NULL ORDER BY verified_at DESC LIMIT 5");
+        $angkatan_stats = conn()->query("SELECT LEFT(nis, 4) as angkatan, COUNT(*) as total, SUM(verified) as verified_count FROM siswa GROUP BY LEFT(nis, 4) ORDER BY angkatan DESC");
         ?>
         <?php if ($success): ?><div class="alert alert-success"><?= $success ?></div><?php endif; ?>
         <?php if ($error): ?><div class="alert alert-danger"><?= $error ?></div><?php endif; ?>
@@ -386,6 +508,20 @@ switch ($page) {
                     <h3><?= $complete ?></h3>
                 </div>
             </div>
+        </div>
+
+        <div class="row g-2 g-md-3 mb-4">
+            <?php while ($a = $angkatan_stats->fetch_assoc()): 
+                $tp_label = 'TP 20' . substr($a['angkatan'], 0, 2) . '/20' . substr($a['angkatan'], 2, 2);
+            ?>
+            <div class="col-6 col-md-3">
+                <div class="card text-center p-3 h-100">
+                    <p class="text-muted small mb-1"><?= $tp_label ?></p>
+                    <h3 class="fw-bold mb-0"><?= $a['total'] ?></h3>
+                    <small class="text-success"><?= $a['verified_count'] ?> terverifikasi</small>
+                </div>
+            </div>
+            <?php endwhile; ?>
         </div>
 
         <div class="row g-3">

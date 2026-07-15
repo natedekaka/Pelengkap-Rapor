@@ -99,7 +99,6 @@ require_admin();
                     <a href="index.php?page=export"><i class="fas fa-download"></i> Export Data</a>
                     <a href="ganti_password.php" class="active"><i class="fas fa-key"></i> Ganti Password</a>
                     <hr style="border-color: rgba(255,255,255,0.1); margin: 0.5rem 1rem;">
-                    <a href="../verifikasi.php"><i class="fas fa-user-check"></i> Data Per-Siswa</a>
                     <a href="../logout.php"><i class="fas fa-sign-out-alt"></i> Keluar</a>
                 </div>
             </div>
