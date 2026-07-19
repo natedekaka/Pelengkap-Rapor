@@ -42,6 +42,17 @@ CREATE TABLE IF NOT EXISTS siswa (
   INDEX idx_verified (verified)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS settings (
+  setting_key VARCHAR(50) PRIMARY KEY,
+  setting_value TEXT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO settings (setting_key, setting_value) VALUES
+('kota', 'Cimahi'),
+('kepala_sekolah', 'Drs. Deden Musa'),
+('nip_kepsek', '196409211988031003'),
+('nama_sekolah', 'SMA Negeri 6 Cimahi');
+
 -- Admin default: username=admin, password=admin
 INSERT INTO users (username, password, nama_lengkap, role) VALUES
 ('admin', '$2y$10$QJKBiNDxyX6htxeQysyMNOrBmJkkDXPAdP58G2ciuQPm8wspAiaQy', 'Administrator', 'admin');

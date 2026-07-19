@@ -76,6 +76,7 @@ function render_header($title) {
                     <a href="?page=siswa" class="<?= $page === 'siswa' ? 'active' : '' ?>"><i class="fas fa-users"></i> Data Siswa</a>
                     <a href="?page=export" class="<?= $page === 'export' ? 'active' : '' ?>"><i class="fas fa-download"></i> Export Data</a>
                     <a href="ganti_password.php"><i class="fas fa-key"></i> Ganti Password</a>
+                    <a href="?page=pengaturan" class="<?= $page === 'pengaturan' ? 'active' : '' ?>"><i class="fas fa-cog"></i> Pengaturan</a>
                     <hr style="border-color: rgba(255,255,255,0.1); margin: 0.5rem 1rem;">
                     <a href="../logout.php"><i class="fas fa-sign-out-alt"></i> Keluar</a>
                 </div>
@@ -322,6 +323,9 @@ switch ($page) {
                                 <a href="../verifikasi.php?nis=<?= urlencode($s['nis']) ?>" class="btn btn-sm btn-outline-primary btn-action">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
+                                <a href="?page=cetak_siswa&nis=<?= urlencode($s['nis']) ?>" class="btn btn-sm btn-outline-danger btn-action" target="_blank">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </a>
                             </td>
                         </tr>
                         <?php endwhile; ?>
@@ -462,6 +466,289 @@ switch ($page) {
                     <p class="text-muted small">Cetak data siswa per halaman verifikasi langsung dari browser</p>
                     <a href="?page=siswa" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-right"></i> Ke Data Siswa</a>
                 </div>
+            </div>
+        </div>
+        <?php
+        render_footer();
+        break;
+
+    case 'cetak_siswa':
+        $nis = $_GET['nis'] ?? '';
+        $stmt = conn()->prepare("SELECT * FROM siswa WHERE nis = ?");
+        $stmt->bind_param("s", $nis);
+        $stmt->execute();
+        $r = $stmt->get_result()->fetch_assoc();
+
+        if (!$r) { echo "Siswa tidak ditemukan"; exit; }
+
+        $fmt_date = function($d) {
+            if (!$d || $d === '0000-00-00' || $d === '00:00:00') return '-';
+            $mons = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            $t = strtotime($d);
+            return date('j', $t) . ' ' . $mons[(int)date('m', $t)] . ' ' . date('Y', $t);
+        };
+
+        $ttl = ($r['tempat_lahir'] ?? '-') . ', ' . $fmt_date($r['tgl_lahir']);
+        $tanggal_diterima = $fmt_date($r['diterima_tanggal']);
+        ?>
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+            <meta charset="UTF-8">
+            <title>Cetak - <?= htmlspecialchars($r['nama']) ?></title>
+            <style>
+                @page { size: A4; margin: 20mm 25mm; }
+                body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #000; line-height: 1.4; margin: 0; padding: 0; }
+                .header { text-align: center; margin-bottom: 18px; }
+                .header h2 { font-size: 14pt; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
+                .data { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+                .data td { padding: 2.5px 0; vertical-align: top; font-size: 11pt; line-height: 1.5; }
+                .data td.num { width: 28px; white-space: nowrap; }
+                .data td.field { width: 210px; white-space: nowrap; }
+                .data td.colon { width: 15px; text-align: center; white-space: nowrap; }
+                .data td.value { white-space: normal; }
+                .sub td { padding: 2.5px 0; }
+                .sub td:first-child { width: 28px; white-space: nowrap; }
+                .sub td:nth-child(2) { width: 210px; white-space: nowrap; }
+                .ttd-table { width: 100%; margin-top: 25px; border-collapse: collapse; }
+                .ttd-table td { vertical-align: top; padding: 0; }
+                .photo-space { width: 110px; height: 150px; }
+                .ttd-sign .city { font-size: 11pt; }
+                .ttd-sign .role { font-size: 11pt; margin-bottom: 65px; }
+                .ttd-sign .name { font-weight: bold; font-size: 11pt; margin: 3px 0; }
+                .ttd-sign .nip { font-size: 10pt; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>IDENTITAS PESERTA DIDIK</h2>
+            </div>
+
+            <table class="data">
+                <tr>
+                    <td class="num">1.</td>
+                    <td class="field">Nama Lengkap Peserta Didik</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['nama']) ?></td>
+                </tr>
+                <tr>
+                    <td class="num">2.</td>
+                    <td class="field">Nomor Induk/NISN</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['nis']) ?> / <?= htmlspecialchars($r['nisn']) ?></td>
+                </tr>
+                <tr>
+                    <td class="num">3.</td>
+                    <td class="field">Tempat, Tanggal Lahir</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($ttl) ?></td>
+                </tr>
+                <tr>
+                    <td class="num">4.</td>
+                    <td class="field">Jenis Kelamin</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['jenis_kelamin'] ?? '-') ?></td>
+                </tr>
+                <tr>
+                    <td class="num">5.</td>
+                    <td class="field">Agama</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['agama'] ?? '-') ?></td>
+                </tr>
+                <tr>
+                    <td class="num">6.</td>
+                    <td class="field">Status dalam Keluarga</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['status_keluarga'] ?? '-') ?></td>
+                </tr>
+                <tr>
+                    <td class="num">7.</td>
+                    <td class="field">Anak ke</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= $r['anak_ke'] ?? '-' ?></td>
+                </tr>
+                <tr>
+                    <td class="num">8.</td>
+                    <td class="field">Alamat Peserta Didik</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['alamat'] ?? '-') ?></td>
+                </tr>
+                <tr>
+                    <td class="num">9.</td>
+                    <td class="field">Nomor Telepon Rumah</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['no_telp'] ?? '-') ?></td>
+                </tr>
+                <tr>
+                    <td class="num">10.</td>
+                    <td class="field">Sekolah Asal</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['sekolah_asal'] ?? '-') ?></td>
+                </tr>
+                <tr>
+                    <td class="num">11.</td>
+                    <td class="field">Diterima di sekolah ini</td>
+                    <td class="colon">:</td>
+                    <td class="value"></td>
+                </tr>
+                <tr class="sub">
+                    <td></td>
+                    <td>                    Di kelas</td>
+                    <td class="colon">:</td>
+                    <td class="value">X</td>
+                </tr>
+                <tr class="sub">
+                    <td></td>
+                    <td>Pada tanggal</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($tanggal_diterima) ?></td>
+                </tr>
+                <tr>
+                    <td class="num">12.</td>
+                    <td class="field">Nama Orang Tua</td>
+                    <td class="colon">:</td>
+                    <td class="value"></td>
+                </tr>
+                <tr class="sub">
+                    <td></td>
+                    <td>a. Ayah</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['nama_ayah'] ?? '-') ?></td>
+                </tr>
+                <tr class="sub">
+                    <td></td>
+                    <td>b. Ibu</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['nama_ibu'] ?? '-') ?></td>
+                </tr>
+                <tr>
+                    <td class="num">13.</td>
+                    <td class="field">Alamat Orang Tua</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['alamat_ortu'] ?? '-') ?></td>
+                </tr>
+                <tr>
+                    <td class="num">14.</td>
+                    <td class="field">Nomor Telepon Rumah</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['no_telp_ortu'] ?? '-') ?></td>
+                </tr>
+                <tr>
+                    <td class="num">15.</td>
+                    <td class="field">Pekerjaan Orang Tua</td>
+                    <td class="colon">:</td>
+                    <td class="value"></td>
+                </tr>
+                <tr class="sub">
+                    <td></td>
+                    <td>a. Ayah</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['pekerjaan_ayah'] ?? '-') ?></td>
+                </tr>
+                <tr class="sub">
+                    <td></td>
+                    <td>b. Ibu</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['pekerjaan_ibu'] ?? '-') ?></td>
+                </tr>
+                <tr>
+                    <td class="num">16.</td>
+                    <td class="field">Nama Wali Siswa</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['nama_wali'] ?? '-') ?></td>
+                </tr>
+                <tr>
+                    <td class="num">17.</td>
+                    <td class="field">Alamat Wali Peserta Didik</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['alamat_wali'] ?? '-') ?></td>
+                </tr>
+                <tr>
+                    <td class="num">18.</td>
+                    <td class="field">Nomor Telepon Rumah</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['no_telp_wali'] ?? '-') ?></td>
+                </tr>
+                <tr>
+                    <td class="num">19.</td>
+                    <td class="field">Pekerjaan Wali Peserta Didik</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= htmlspecialchars($r['pekerjaan_wali'] ?? '-') ?></td>
+                </tr>
+            </table>
+
+            <table class="ttd-table">
+                <tr>
+                    <td style="width:65%;">
+                        <div class="photo-space"></div>
+                    </td>
+                    <td style="width:35%;">
+                        <div class="ttd-sign">
+                            <div class="city"><?= htmlspecialchars(get_setting('kota')) ?>, <?= $fmt_date($r['diterima_tanggal']) ?: date('d F Y') ?></div>
+                            <div class="role">Kepala Sekolah</div>
+                            <div class="name"><?= htmlspecialchars(get_setting('kepala_sekolah')) ?></div>
+                            <div class="nip">NIP. <?= htmlspecialchars(get_setting('nip_kepsek')) ?></div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <script>window.onload = function() { window.print(); };</script>
+        </body>
+        </html>
+        <?php
+        exit;
+
+    case 'pengaturan':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_settings'])) {
+            if (!isset($_POST['csrf_token']) || !verify_csrf($_POST['csrf_token'])) {
+                $_SESSION['error'] = "Token keamanan tidak valid!";
+            } else {
+                $fields = ['kota', 'kepala_sekolah', 'nip_kepsek', 'nama_sekolah'];
+                foreach ($fields as $f) {
+                    set_setting($f, trim($_POST[$f] ?? ''));
+                }
+                $_SESSION['success'] = "Pengaturan berhasil disimpan.";
+            }
+            header('Location: ?page=pengaturan');
+            exit;
+        }
+
+        render_header('Pengaturan');
+        ?>
+        <?php if ($success): ?><div class="alert alert-success"><?= $success ?></div><?php endif; ?>
+        <?php if ($error): ?><div class="alert alert-danger"><?= $error ?></div><?php endif; ?>
+
+        <div class="topbar">
+            <div><h5 class="m-0 fw-bold"><i class="fas fa-cog me-2"></i>Pengaturan Sekolah</h5></div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <?= csrf_field() ?>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Nama Sekolah</label>
+                            <input type="text" name="nama_sekolah" class="form-control" value="<?= htmlspecialchars(get_setting('nama_sekolah')) ?>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Kota</label>
+                            <input type="text" name="kota" class="form-control" value="<?= htmlspecialchars(get_setting('kota')) ?>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Nama Kepala Sekolah</label>
+                            <input type="text" name="kepala_sekolah" class="form-control" value="<?= htmlspecialchars(get_setting('kepala_sekolah')) ?>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">NIP Kepala Sekolah</label>
+                            <input type="text" name="nip_kepsek" class="form-control" value="<?= htmlspecialchars(get_setting('nip_kepsek')) ?>">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" name="save_settings" value="1" class="btn btn-primary"><i class="fas fa-save me-2"></i>Simpan</button>
+                    </div>
+                </form>
             </div>
         </div>
         <?php

@@ -67,3 +67,17 @@ function format_tgl($date) {
     $d = explode('-', $date);
     return (int)$d[2] . ' ' . $months[(int)$d[1]] . ' ' . $d[0];
 }
+
+function get_setting($key, $default = '-') {
+    $q = conn()->prepare("SELECT setting_value FROM settings WHERE setting_key = ?");
+    $q->bind_param("s", $key);
+    $q->execute();
+    $r = $q->get_result()->fetch_assoc();
+    return $r['setting_value'] ?? $default;
+}
+
+function set_setting($key, $value) {
+    $q = conn()->prepare("INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?");
+    $q->bind_param("sss", $key, $value, $value);
+    return $q->execute();
+}
