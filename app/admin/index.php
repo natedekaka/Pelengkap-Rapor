@@ -498,7 +498,7 @@ switch ($page) {
             <title>Cetak - <?= htmlspecialchars($r['nama']) ?></title>
             <style>
                 @page { size: A4; margin: 20mm 25mm; }
-                body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #000; line-height: 1.4; margin: 0; padding: 0; }
+                body { font-family: 'Arial', 'Helvetica', sans-serif; font-size: 11pt; color: #000; line-height: 1.4; margin: 0; padding: 0; }
                 .header { text-align: center; margin-bottom: 18px; }
                 .header h2 { font-size: 14pt; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
                 .data { width: 100%; border-collapse: collapse; margin-bottom: 0; }
