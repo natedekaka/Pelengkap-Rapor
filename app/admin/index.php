@@ -499,7 +499,7 @@ switch ($page) {
             <style>
                 @page { size: A4; margin: 20mm 25mm; }
                 body { font-family: 'Arial', 'Helvetica', sans-serif; font-size: 11pt; color: #000; line-height: 1.4; margin: 0; padding: 0; }
-                .header { text-align: center; margin-bottom: 18px; }
+                .header { text-align: center; margin-bottom: 30px; }
                 .header h2 { font-size: 14pt; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
                 .data { width: 100%; border-collapse: collapse; margin-bottom: 0; }
                 .data td { padding: 2.5px 0; vertical-align: top; font-size: 11pt; line-height: 1.5; }
@@ -510,7 +510,7 @@ switch ($page) {
                 .sub td { padding: 2.5px 0; }
                 .sub td:first-child { width: 28px; white-space: nowrap; }
                 .sub td:nth-child(2) { width: 210px; white-space: nowrap; }
-                .ttd-table { width: 100%; margin-top: 25px; border-collapse: collapse; }
+                .ttd-table { width: 100%; margin-top: 45px; border-collapse: collapse; }
                 .ttd-table td { vertical-align: top; padding: 0; }
                 .photo-space { width: 110px; height: 150px; }
                 .ttd-sign .city { font-size: 11pt; }
@@ -657,20 +657,20 @@ switch ($page) {
                     <td class="colon">:</td>
                     <td class="value"><?= htmlspecialchars($r['nama_wali'] ?? '-') ?></td>
                 </tr>
-                <tr>
-                    <td class="num">17.</td>
-                    <td class="field">Alamat Wali Peserta Didik</td>
+                <tr class="sub">
+                    <td></td>
+                    <td>Alamat Wali Peserta Didik</td>
                     <td class="colon">:</td>
                     <td class="value"><?= htmlspecialchars($r['alamat_wali'] ?? '-') ?></td>
                 </tr>
-                <tr>
-                    <td class="num">18.</td>
-                    <td class="field">Nomor Telepon Rumah</td>
+                <tr class="sub">
+                    <td></td>
+                    <td>Nomor Telepon Rumah</td>
                     <td class="colon">:</td>
                     <td class="value"><?= htmlspecialchars($r['no_telp_wali'] ?? '-') ?></td>
                 </tr>
                 <tr>
-                    <td class="num">19.</td>
+                    <td class="num">17.</td>
                     <td class="field">Pekerjaan Wali Peserta Didik</td>
                     <td class="colon">:</td>
                     <td class="value"><?= htmlspecialchars($r['pekerjaan_wali'] ?? '-') ?></td>
