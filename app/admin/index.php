@@ -497,26 +497,26 @@ switch ($page) {
             <meta charset="UTF-8">
             <title>Cetak - <?= htmlspecialchars($r['nama']) ?></title>
             <style>
-                @page { size: A4; margin: 15mm 25mm; }
-                body { font-family: 'Arial', 'Helvetica', sans-serif; font-size: 10pt; color: #000; line-height: 1.3; margin: 0; padding: 0; }
-                .header { text-align: center; margin-bottom: 20px; }
-                .header h2 { font-size: 13pt; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
+                @page { size: A4; margin: 18mm 25mm; }
+                body { font-family: 'Arial', 'Helvetica', sans-serif; font-size: 11pt; color: #000; line-height: 1.4; margin: 0; padding: 0; }
+                .header { text-align: center; margin-bottom: 18px; }
+                .header h2 { font-size: 14pt; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
                 .data { width: 100%; border-collapse: collapse; margin-bottom: 0; }
-                .data td { padding: 1.5px 0; vertical-align: top; font-size: 10pt; line-height: 1.3; }
-                .data td.num { width: 25px; white-space: nowrap; }
-                .data td.field { width: 200px; white-space: nowrap; }
-                .data td.colon { width: 12px; text-align: center; white-space: nowrap; }
+                .data td { padding: 2.5px 0; vertical-align: top; font-size: 11pt; line-height: 1.4; }
+                .data td.num { width: 28px; white-space: nowrap; }
+                .data td.field { width: 210px; white-space: nowrap; }
+                .data td.colon { width: 15px; text-align: center; white-space: nowrap; }
                 .data td.value { white-space: normal; }
-                .sub td { padding: 1.5px 0; }
-                .sub td:first-child { width: 25px; white-space: nowrap; }
-                .sub td:nth-child(2) { width: 200px; white-space: nowrap; }
-                .ttd-table { width: 100%; margin-top: 25px; border-collapse: collapse; }
+                .sub td { padding: 2.5px 0; }
+                .sub td:first-child { width: 28px; white-space: nowrap; }
+                .sub td:nth-child(2) { width: 210px; white-space: nowrap; }
+                .ttd-table { width: 100%; margin-top: 40px; border-collapse: collapse; }
                 .ttd-table td { vertical-align: top; padding: 0; }
-                .photo-space { width: 110px; height: 130px; }
-                .ttd-sign .city { font-size: 10pt; }
-                .ttd-sign .role { font-size: 10pt; margin-bottom: 40px; }
-                .ttd-sign .name { font-weight: bold; font-size: 10pt; margin: 2px 0; }
-                .ttd-sign .nip { font-size: 9pt; }
+                .photo-space { width: 110px; height: 140px; }
+                .ttd-sign .city { font-size: 11pt; }
+                .ttd-sign .role { font-size: 11pt; margin-bottom: 45px; }
+                .ttd-sign .name { font-weight: bold; font-size: 11pt; margin: 3px 0; }
+                .ttd-sign .nip { font-size: 10pt; }
             </style>
         </head>
         <body>
