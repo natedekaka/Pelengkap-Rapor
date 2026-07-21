@@ -490,6 +490,7 @@ switch ($page) {
 
         $ttl = ($r['tempat_lahir'] ?? '-') . ', ' . $fmt_date($r['tgl_lahir']);
         $tanggal_diterima = $fmt_date($r['diterima_tanggal']);
+        $fmt_val = function($v) { $v = trim($v ?? ''); return ($v === '' || preg_match('/^\.+$/', $v)) ? '-' : htmlspecialchars($v); };
         ?>
         <!DOCTYPE html>
         <html lang="id">
@@ -547,19 +548,19 @@ switch ($page) {
                     <td class="num">4.</td>
                     <td class="field">Jenis Kelamin</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['jenis_kelamin'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['jenis_kelamin']) ?></td>
                 </tr>
                 <tr>
                     <td class="num">5.</td>
                     <td class="field">Agama</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['agama'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['agama']) ?></td>
                 </tr>
                 <tr>
                     <td class="num">6.</td>
                     <td class="field">Status dalam Keluarga</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['status_keluarga'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['status_keluarga']) ?></td>
                 </tr>
                 <tr>
                     <td class="num">7.</td>
@@ -571,13 +572,13 @@ switch ($page) {
                     <td class="num">8.</td>
                     <td class="field">Alamat Peserta Didik</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['alamat'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['alamat']) ?></td>
                 </tr>
                 <tr>
                     <td class="num">9.</td>
                     <td class="field">Nomor Telepon Rumah</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['no_telp'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['no_telp']) ?></td>
                 </tr>
                 <tr>
                     <td class="num">10.</td>
@@ -613,25 +614,25 @@ switch ($page) {
                     <td></td>
                     <td>a. Ayah</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['nama_ayah'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['nama_ayah']) ?></td>
                 </tr>
                 <tr class="sub">
                     <td></td>
                     <td>b. Ibu</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['nama_ibu'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['nama_ibu']) ?></td>
                 </tr>
                 <tr>
                     <td class="num">13.</td>
                     <td class="field">Alamat Orang Tua</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['alamat_ortu'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['alamat_ortu']) ?></td>
                 </tr>
                 <tr>
                     <td class="num">14.</td>
                     <td class="field">Nomor Telepon Rumah</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['no_telp_ortu'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['no_telp_ortu']) ?></td>
                 </tr>
                 <tr>
                     <td class="num">15.</td>
@@ -643,37 +644,37 @@ switch ($page) {
                     <td></td>
                     <td>a. Ayah</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['pekerjaan_ayah'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['pekerjaan_ayah']) ?></td>
                 </tr>
                 <tr class="sub">
                     <td></td>
                     <td>b. Ibu</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['pekerjaan_ibu'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['pekerjaan_ibu']) ?></td>
                 </tr>
                 <tr>
                     <td class="num">16.</td>
                     <td class="field">Nama Wali Siswa</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['nama_wali'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['nama_wali']) ?></td>
                 </tr>
                 <tr class="sub">
                     <td></td>
                     <td>Alamat Wali Peserta Didik</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['alamat_wali'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['alamat_wali']) ?></td>
                 </tr>
                 <tr class="sub">
                     <td></td>
                     <td>Nomor Telepon Rumah</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['no_telp_wali'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['no_telp_wali']) ?></td>
                 </tr>
                 <tr>
                     <td class="num">17.</td>
                     <td class="field">Pekerjaan Wali Peserta Didik</td>
                     <td class="colon">:</td>
-                    <td class="value"><?= htmlspecialchars($r['pekerjaan_wali'] ?? '-') ?></td>
+                    <td class="value"><?= $fmt_val($r['pekerjaan_wali']) ?></td>
                 </tr>
             </table>
 
